@@ -14,17 +14,19 @@ import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
 
 
 public class Fantasy {
 
 	private JFrame frame;
-	private JTextField txtDays;
 	private JTextField txtUrl;
 	private JButton btnSubmit;
 	int days;
 	private JLabel lblError1;
 	private int year = Calendar.getInstance().get(Calendar.YEAR);
+	private JLabel label;
 
 	/**
 	 * Launch the application.
@@ -52,6 +54,7 @@ public class Fantasy {
 	/**
 	 * Initialize the contents of the frame.
 	 */
+	@SuppressWarnings("unchecked")
 	private void initialize() {
 		frame = new JFrame();
 		frame.setResizable(false);
@@ -60,13 +63,11 @@ public class Fantasy {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
-		txtDays = new JTextField();
-		txtDays.setToolTipText("Enter between 2-7 days");
-		txtDays.setHorizontalAlignment(SwingConstants.CENTER);
-		txtDays.setBounds(145, 164, 156, 28);
-		txtDays.setText("# Days (2-7)");
-		frame.getContentPane().add(txtDays);
-		txtDays.setColumns(10);
+		final JComboBox dayBox = new JComboBox();
+		dayBox.setModel(new DefaultComboBoxModel(new String[] {"Days", "2", "3", "4", "5", "6", "7"}));
+		dayBox.setBounds(183, 172, 87, 27);
+		((JLabel)dayBox.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+		frame.getContentPane().add(dayBox);
 		
 		final JLabel lblError = new JLabel("");
 		lblError.setForeground(Color.RED);
@@ -77,15 +78,16 @@ public class Fantasy {
 		txtUrl = new JTextField();
 		txtUrl.setToolTipText("Enter \"Start Active Players\" URL");
 		txtUrl.setHorizontalAlignment(SwingConstants.CENTER);
-		txtUrl.setBounds(16, 193, 428, 28);
+		txtUrl.setBounds(16, 200, 428, 28);
 		txtUrl.setText("URL");
 		frame.getContentPane().add(txtUrl);
 		txtUrl.setColumns(10);
 		
 		btnSubmit = new JButton();
 		btnSubmit.setIcon(new ImageIcon(Fantasy.class.getResource("/img/submit.png")));
-		btnSubmit.setBounds(191, 231, 76, 31);
+		btnSubmit.setBounds(188, 235, 76, 31);
 		btnSubmit.setBorder(null);
+		
 		
 		btnSubmit.addMouseListener(new java.awt.event.MouseAdapter() {
 		    public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -102,16 +104,13 @@ public class Fantasy {
 			public void actionPerformed(ActionEvent e) {
 				long startTime = System.nanoTime();
 				String urlString = txtUrl.getText();
-				boolean isInvalid = false;
 				boolean isValidURL = false;
 				try{
-					days = Integer.parseInt(txtDays.getText());
-					System.out.println(days);
-					lblError.setText("");
-				} catch (NumberFormatException nfe){
+				days = Integer.parseInt((String) dayBox.getSelectedItem());
+				if(lblError.getText().length()>0) lblError.setText("");
+				} catch (NumberFormatException n){
 					lblError.setText("Invalid days!");
-					isInvalid = true;
-					}
+				}
 				if(urlString.contains("https://basketball.fantasysports.yahoo.com/nba/") &&
 						(days>=2) && (days<=7)){
 					isValidURL = true;
@@ -121,7 +120,6 @@ public class Fantasy {
 				for(int i = 0; i < days; i++){
 							oldDate = date;
 							date = nextDate(date);
-						//	System.out.println(urlString);
 					    try {
 					        Desktop.getDesktop().browse(new URL(urlString).toURI());
 							urlString = urlString.replace(oldDate, date);
@@ -134,11 +132,8 @@ public class Fantasy {
 				}else{
 					if(!urlString.contains("https://basketball.fantasysports.yahoo.com/nba")) 
 						lblError1.setText("Invalid URL!");
-					if(days < 2 && isInvalid==false) lblError.setText("Pick more days!");
-					else if(days > 7 && isInvalid==false) lblError.setText("Pick fewer days!");
 				}
 
-				txtDays.setText("");
 				txtUrl.setText("");
 				long stopTime = System.nanoTime();
 				double result = (stopTime - startTime)/1000000;
@@ -155,15 +150,8 @@ public class Fantasy {
 				}
 			}
 		};
-		txtUrl.addKeyListener(Enter);
-		txtDays.addKeyListener(Enter);
+
 		btnSubmit.addKeyListener(Enter);
-		
-		JLabel lblStepGo = new JLabel("");
-		lblStepGo.setHorizontalAlignment(SwingConstants.CENTER);
-		lblStepGo.setIcon(new ImageIcon(Fantasy.class.getResource("/img/instructions.png")));
-		lblStepGo.setBounds(16, 49, 428, 114);
-		frame.getContentPane().add(lblStepGo);
 		
 		JLabel lblYahooFantasyLineup = new JLabel("Yahoo! Fantasy Lineup Sorter");
 		lblYahooFantasyLineup.setHorizontalAlignment(SwingConstants.CENTER);
@@ -177,9 +165,10 @@ public class Fantasy {
 		lblError1.setBounds(312, 234, 121, 28);
 		frame.getContentPane().add(lblError1);
 		
-		JLabel lblDays = new JLabel("");
-		lblDays.setBounds(313, 170, 120, 16);
-		frame.getContentPane().add(lblDays);
+		label = new JLabel("");
+		label.setIcon(new ImageIcon(Fantasy.class.getResource("/img/instruc.png")));
+		label.setBounds(16, 39, 438, 141);
+		frame.getContentPane().add(label);
 
 	}
 /**
