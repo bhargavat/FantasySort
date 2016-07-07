@@ -17,16 +17,16 @@ import java.awt.event.KeyAdapter;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 
-
 public class Fantasy {
 
 	private JFrame frame;
 	private JTextField txtUrl;
 	private JButton btnSubmit;
-	int days;
 	private JLabel lblError1;
 	private int year = Calendar.getInstance().get(Calendar.YEAR);
 	private JLabel label;
+	String invDays = "Invalid Days!";
+	String invURL = "Invalid URL!";
 
 	/**
 	 * Launch the application.
@@ -72,7 +72,7 @@ public class Fantasy {
 		final JLabel lblError = new JLabel("");
 		lblError.setForeground(Color.RED);
 		lblError.setHorizontalAlignment(SwingConstants.CENTER);
-		lblError.setBounds(26, 234, 121, 28);
+		lblError.setBounds(37, 238, 121, 28);
 		frame.getContentPane().add(lblError);
 		
 		txtUrl = new JTextField();
@@ -102,6 +102,9 @@ public class Fantasy {
 
 		btnSubmit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				lblError.setText("");
+				lblError1.setText("");
+				int days = -1;
 				long startTime = System.nanoTime();
 				String urlString = txtUrl.getText();
 				boolean isValidURL = false;
@@ -109,10 +112,13 @@ public class Fantasy {
 				days = Integer.parseInt((String) dayBox.getSelectedItem());
 				if(lblError.getText().length()>0) lblError.setText("");
 				} catch (NumberFormatException n){
-					lblError.setText("Invalid days!");
+					lblError.setText(invDays);	
 				}
-				if(urlString.contains("https://basketball.fantasysports.yahoo.com/nba/") &&
-						(days>=2) && (days<=7)){
+				if(!(lblError.getText().equals(invDays))){
+				try{
+	//https://basketball.fantasysports.yahoo.com/nba/105100/6/startactiveplayers?date=2016-02-17&crumb=NOiQuYBDyF2
+				if(urlString.contains("https://basketball.fantasysports.yahoo.com/nba/")
+						&& urlString.length()==107){ //url always 107 characters long
 					isValidURL = true;
 					int start = urlString.indexOf(Integer.toString(year)); //index of date start
 					String date = urlString.substring(start,start+10);
@@ -123,22 +129,37 @@ public class Fantasy {
 					    try {
 					        Desktop.getDesktop().browse(new URL(urlString).toURI());
 							urlString = urlString.replace(oldDate, date);
+							System.out.println("success");
 					    } catch (Exception ex) {
 					        ex.printStackTrace();
 					    }
+					    try {
+					    	  Thread.sleep(1500);
+					    	} catch (InterruptedException ie) {
+					    	    //Handle exception
+					    	}
 					}
 				if(lblError1.getText().length()>0) lblError1.setText(""); //if previous error message still exists, remove it
 				if(lblError.getText().length()>0) lblError.setText("");
-				}else{
-					if(!urlString.contains("https://basketball.fantasysports.yahoo.com/nba")) 
-						lblError1.setText("Invalid URL!");
+				if(days > 0) days = 0;
+					}else{
+						lblError1.setText(invURL);
+					}
+				} 
+				catch(NumberFormatException n){
+					lblError.setText(invDays);
 				}
-
+				catch(Exception ex){
+					//do Nothing
+				}
 				txtUrl.setText("");
 				long stopTime = System.nanoTime();
 				double result = (stopTime - startTime)/1000000;
 				if(lblError1.getText().length()==0 && result > 100 && isValidURL == true) lblError1.setText("Done in "+result/1000+" s");
 				else if(lblError1.getText().length()==0 && result < 100 && isValidURL == true) lblError1.setText("Done in "+result+" ms");
+			}
+				if(!(urlString.contains("https://basketball.fantasysports.yahoo.com/nba/"))
+						&& urlString.length()!=107) lblError1.setText(invURL);
 			}
 		});
 		frame.getContentPane().add(btnSubmit);
@@ -150,7 +171,7 @@ public class Fantasy {
 				}
 			}
 		};
-
+		txtUrl.addKeyListener(Enter);
 		btnSubmit.addKeyListener(Enter);
 		
 		JLabel lblYahooFantasyLineup = new JLabel("Yahoo! Fantasy Lineup Sorter");
@@ -162,7 +183,7 @@ public class Fantasy {
 		lblError1 = new JLabel("");
 		lblError1.setHorizontalAlignment(SwingConstants.CENTER);
 		lblError1.setForeground(Color.RED);
-		lblError1.setBounds(312, 234, 121, 28);
+		lblError1.setBounds(293, 238, 121, 28);
 		frame.getContentPane().add(lblError1);
 		
 		label = new JLabel("");
